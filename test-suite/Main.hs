@@ -6,6 +6,7 @@ import qualified Test.Tasty
 -- writing tests. Its website has more info: <https://hspec.github.io>.
 import Test.Tasty.Hspec
 import Test.Hspec
+import RegExp hiding (main)
 
 main :: IO ()
 main = do
@@ -14,5 +15,8 @@ main = do
 
 spec :: Spec
 spec = parallel $ do
-    it "is trivially true" $ do
-        True `shouldBe` True
+    it "pretty printing concat a.b.c" $ do
+        show(Concat (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "a.b.c"
+
+    it "pretty printing plus and star a+b*" $ do
+        show (Star (Plus (Ch 'a') (Ch 'b'))) `shouldBe` "a+b*"
