@@ -32,6 +32,7 @@ ghc-options:
 library:
   dependencies:
   - base
+  - megaparsec
   source-dirs: library
 
 executables:
