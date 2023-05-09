@@ -1,9 +1,16 @@
 -- | An example module.
 module RegExp 
-  (
+{-  (
     main
     , RegExp (..)
-    ) where
+    , Parser
+    ) -} where
+
+
+import Data.Text hiding(elem, foldl1)
+import Text.Megaparsec hiding (parse, empty)
+import Data.Void (Void)
+import Prelude
 
 -- | An example function.
 main :: IO ()
@@ -13,8 +20,8 @@ main = putStrLn "Its alive"
 data RegExp = EmptySet 
     | Epsilon 
     | Ch Char 
-    | Concat RegExp RegExp 
     | Plus RegExp RegExp 
+    | Concat RegExp RegExp 
     | Not RegExp 
     | Star RegExp 
     deriving (Eq, Ord)
@@ -23,7 +30,7 @@ data RegExp = EmptySet
 instance Show RegExp where
   show = showConcat
     where
-    showConcat (Concat a b) = show a ++ "." ++ show b
+    showConcat (Concat a b) = show a ++ show b
     showConcat re = showPlus re
 
     showPlus (Plus a b) = show a ++ "+" ++ show b
@@ -39,3 +46,32 @@ instance Show RegExp where
     showChar Epsilon = "ε"
     showChar EmptySet = "∅"
     showChar re = "(" ++ showConcat re ++ ")"
+
+
+type Parser = Parsec Void Text
+  
+parse, parseChar, parseConcat, parsePlus, parseStar :: Parser RegExp
+
+specialChars :: String
+specialChars = "()ε∅\\+"
+
+parse = parsePlus 
+parsePlus = 
+  foldl1 Plus <$> sepBy1 parseConcat (single '+')
+parseConcat =
+  foldl1 Concat <$> some parseStar
+parseStar = 
+  try (Star <$> parseChar <* single '*')
+  <|> parseChar
+
+parseChar = 
+    try(Ch <$> satisfy (not . (`elem` specialChars)))
+  <|> try(Ch <$> (single '\\' *> satisfy (`elem` specialChars)))
+  <|> try(pure Epsilon <* single 'ε')
+  <|> try(pure EmptySet <* single '∅')
+  <|> parens parsePlus
+
+--parseNot = undefined
+
+parens :: Parser a -> Parser a
+parens = between (single '(') (single ')')

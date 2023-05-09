@@ -7,6 +7,8 @@ import qualified Test.Tasty
 import Test.Tasty.Hspec
 import Test.Hspec
 import RegExp hiding (main)
+import Text.Megaparsec (parseMaybe)
+import Data.Text
 
 main :: IO ()
 main = do
@@ -16,7 +18,14 @@ main = do
 spec :: Spec
 spec = parallel $ do
     it "pretty printing concat a.b.c" $ do
-        show(Concat (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "a.b.c"
+        show(Concat (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "abc"
 
     it "pretty printing plus and star a+b*" $ do
         show (Star (Plus (Ch 'a') (Ch 'b'))) `shouldBe` "a+b*"
+
+    it "pretty printing ab+c" $ do
+        show (Plus (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "ab+c"
+
+    it "parsing ab+c" $ do 
+        parseMaybe RegExp.parse (pack "ab+c")
+          `shouldBe` Just (Plus (Concat (Ch 'a') (Ch 'b')) (Ch 'c'))

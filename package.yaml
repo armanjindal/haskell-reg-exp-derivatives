@@ -33,6 +33,7 @@ library:
   dependencies:
   - base
   - megaparsec
+  - text
   source-dirs: library
 
 executables:
@@ -70,6 +71,8 @@ tests:
     - hspec
     - tasty
     - tasty-hspec
+    - megaparsec
+    - text
     ghc-options:
     - -rtsopts
     - -threaded
