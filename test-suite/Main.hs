@@ -6,17 +6,18 @@ import qualified Test.Tasty
 -- writing tests. Its website has more info: <https://hspec.github.io>.
 import Test.Tasty.Hspec
 import Test.Hspec
-import RegExp hiding (main)
+import RegExpDerivatives hiding (main)
 import Text.Megaparsec (parseMaybe)
 import Data.Text
+import RegExpDerivatives.RegExp (RegExp(..),parse)
 
 main :: IO ()
 main = do
-    test <- testSpec "reg-exp-derivatives" spec
+    test <- testSpec "reg-exp-derivatives" unitTests
     Test.Tasty.defaultMain test
 
-spec :: Spec
-spec = parallel $ do
+unitTests :: Spec
+unitTests = parallel $ do
     it "pretty printing concat a.b.c" $ do
         show(Concat (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "abc"
 
@@ -27,5 +28,5 @@ spec = parallel $ do
         show (Plus (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "ab+c"
 
     it "parsing ab+c" $ do 
-        parseMaybe RegExp.parse (pack "ab+c")
+        parseMaybe parse (pack "ab+c")
           `shouldBe` Just (Plus (Concat (Ch 'a') (Ch 'b')) (Ch 'c'))

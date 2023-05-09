@@ -71,6 +71,7 @@ tests:
     - hspec
     - tasty
     - tasty-hspec
+    - tasty-quickcheck
     - megaparsec
     - text
     ghc-options:

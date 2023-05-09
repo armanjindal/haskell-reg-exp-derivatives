@@ -1,20 +1,16 @@
 -- | An example module.
-module RegExp 
-{-  (
-    main
-    , RegExp (..)
-    , Parser
-    ) -} where
+module RegExpDerivatives.RegExp 
+  (RegExp (..)
+   , Parser
+   , parse
+  ) 
+where
 
 
 import Data.Text hiding(elem, foldl1)
 import Text.Megaparsec hiding (parse, empty)
 import Data.Void (Void)
 import Prelude
-
--- | An example function.
-main :: IO ()
-main = putStrLn "Its alive"
 
 -- Regular Expressions
 data RegExp = EmptySet 
