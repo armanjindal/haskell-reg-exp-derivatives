@@ -11,7 +11,6 @@ module RegExpDerivatives.RegExp
   ) 
 where
 
-
 import Data.Text hiding(elem, foldl1)
 import Text.Megaparsec hiding (parse, empty)
 import Data.Void (Void)
@@ -25,47 +24,51 @@ data RegExp = EmptySet
     | Concat RegExp RegExp 
     | Not RegExp 
     | Star RegExp 
-    deriving (Eq, Ord)
+    | And RegExp RegExp
+    deriving (Eq, Ord, Show)
 
--- TODO: Add Show NOT
-instance Show RegExp where
-  show = showConcat
-    where
-    showConcat (Concat a b) = show a ++ show b
-    showConcat re = showPlus re
+-- instance Show RegExp where
+--   show = showConcat
+--     where
+--     showConcat (Concat a b) = show a ++ show b
+--     showConcat re = showPlus re
 
-    showPlus (Plus a b) = show a ++ "+" ++ show b
-    showPlus re = showStar re
+--     showPlus (Plus a b) = show a ++ "+" ++ show b
+--     showPlus re = showStar re
 
-    showStar (Star a) = show a ++ "*"
-    showStar re = showNot re
+--     showStar (Star a) = show a ++ "*"
+--     showStar re = showNot re
 
-    showNot (Not a) = "¬" ++ show a
-    showNot re = showChar re
+--     showNot (Not a) =  show a ++ "~"
+--     showNot re = showChar re
 
-    showChar (Ch a) = [a]
-    showChar Epsilon = "ε"
-    showChar EmptySet = "∅"
-    showChar re = "(" ++ showConcat re ++ ")"
+--     showChar (Ch a) = [a]
+--     showChar Epsilon = "ε"
+--     showChar EmptySet = "∅"
+--     showChar re = "(" ++ showConcat re ++ ")"
 
 
 type Parser = Parsec Void String
   
---parseNot = undefined
--- parseAnd = undefined
 
-parse, parseChar, parseConcat, parsePlus, parseStar :: Parser RegExp
+parse, parseAnd, parseNot, parseChar, parseConcat, parsePlus, parseStar :: Parser RegExp
 
 specialChars :: String
-specialChars = "()ε∅\\+"
+specialChars = "()ε∅\\+~&"
 
 parse = parsePlus 
 parsePlus = 
-  foldl1 Plus <$> sepBy1 parseConcat (single '+')
+  foldl1 Plus <$> sepBy1 parseAnd (single '+')
+parseAnd =
+  foldl1 And <$> sepBy1 parseConcat (single '&')
 parseConcat =
   foldl1 Concat <$> some parseStar
 parseStar = 
-  try (Star <$> parseChar <* single '*')
+  try (Star <$> parseNot <* single '*')
+  <|> parseNot
+
+parseNot =
+  try (Not <$> parseChar <* single '~')
   <|> parseChar
 
 parseChar = 
@@ -87,7 +90,7 @@ nullable (Star a) = True
 nullable (Ch a) = False
 nullable (Concat a b) =  nullable a && nullable b
 nullable (Plus a b) = nullable a || nullable b
--- nullable (And a b) = nullable a && nullable b
+nullable (And a b) = nullable a && nullable b
 nullable (Not a) = not $ nullable a
 
 deriv :: Char -> RegExp -> RegExp
@@ -102,7 +105,8 @@ deriv a (Concat b c) =
   if nullable b
   then Plus (Concat (deriv a b) c) (deriv a c)
   else Concat (deriv a b) c
--- deriv a (And b c), deriv a ()
+deriv a (And b c) = And (deriv a b) (deriv a c)
+deriv a (Not b) = Not (deriv a b)
 -- Matching on the basis of algorithm 
 
 (~~) :: RegExp -> String -> Bool
@@ -111,3 +115,6 @@ deriv a (Concat b c) =
 justToDef :: Maybe RegExp -> RegExp
 justToDef (Just a) = a
 justToDef Nothing = EmptySet
+
+
+-- Function to generate a DFA from a regular expression using the Brozozwski algorithm
