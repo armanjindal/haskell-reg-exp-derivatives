@@ -2,11 +2,11 @@
 # Cabal file when you run `stack build`. See the hpack website for help with
 # this file: <https://github.com/sol/hpack>.
 name: reg-exp-derivatives
-version: '0.0.0'
+version: '0.0.1'
 github: "githubuser/reg-exp-derivatives"
 license: MIT
-author: "Author name here"
-maintainer: "Author name here"
+author: "Arman Jindal"
+maintainer: "Arman Jindal"
 # synopsis: A new Haskeleton package.
 # description: reg-exp-derivatives is a new Haskeleton package.
 # category: Other
@@ -34,6 +34,8 @@ library:
   - base
   - megaparsec
   - text
+  - containers
+
   source-dirs: library
 
 executables:
@@ -43,6 +45,7 @@ executables:
     dependencies:
     - base
     - reg-exp-derivatives
+    - containers
     ghc-options:
     - -rtsopts
     - -threaded
