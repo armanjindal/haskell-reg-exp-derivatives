@@ -33,6 +33,12 @@ $$
 
 Since this is my first time working with Haskell on a functional programming project of this size, I focused on understandability over complexity. I included in this read-me explanation of what I did and plenty of unit tests that help illustrate how the program works, at each step. This work draws heavily and follows both notation and naming from a paper by S. Owens, J. Reppy, A. Turon called [*Regular-expressions derivatives reexamined*](https://www.ccs.neu.edu/home/turon/re-deriv.pdf) and on the implementation strategy of [Professor Michael Greenberg](https://cs.pomona.edu/~michael/)of Pamano College, who graciously live streamed on Twitch the development and process which proved invaluable for a new initiate to Haskell development and its workflows. I based much of the architecture and code of this project on his presentation. 
 
+This was built using the Haskeleton frame work and can be run with `stack build`.
+
+`stack ghci` for interactivity
+
+`stack test` to run the unit test.
+
 Below is a breakdown of the key steps of the project:
 
 1. The Abstract Data Type
@@ -63,7 +69,7 @@ The next major challenge was to parse the command line input into this object fo
 
 3. Derivative and Nullable
 
-Implementing these was quite straightforward and followed very logically from the paper. This is the benefit of coding in Haskell and with the ADT.  To understand why each rule was what it was, I worked through a few examples. The most confusing of the rules, mathematically is for concatenation. If the first part of the concat (s.a) is nullable it is possible that an epsilon in a string captures it, and in this case, we need to also take the derivative with respect to a. This condition:
+Implementing these was quite straightforward and followed very logically from the paper. This is the benefit of coding in Haskell and with the ADT.  I worked through a few examples to understand why each rule was what it was. The most confusing of the rules, mathematically is for concatenation. If the first part of the concat (s.a) is nullable it is possible that an epsilon in a string captures it, and in this case, we need to also take the derivative with respect to a. This condition:
 
 ```
 deriv a (Concat b c) =
