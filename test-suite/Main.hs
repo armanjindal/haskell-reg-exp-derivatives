@@ -28,5 +28,5 @@ unitTests = parallel $ do
         show (Plus (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "ab+c"
 
     it "parsing ab+c" $ do 
-        parseMaybe parse (pack "ab+c")
+        parseMaybe parse ("ab+c")
           `shouldBe` Just (Plus (Concat (Ch 'a') (Ch 'b')) (Ch 'c'))
