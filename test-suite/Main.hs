@@ -69,3 +69,13 @@ unitTests = parallel $ do
         let regex1 = parseDef "(abba)*"
         Prelude.map (regex1 ~~) ["a", "aa", "abba", "abbaabba", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad"]
             `shouldBe` [False, False, True, True, False, False, False]
+    
+    it "testing NOT & and STAR on regex ((ab)*)~ " $ do
+        let regex1 = parseDef "((ab)*)~"
+        Prelude.map (regex1 ~~) ["ab", "cc", "dsdsdssdsdssdsddcjcdjcdcdncd"]
+            `shouldBe` [False, True, True]
+
+    it "testing AND & and STAR on regex ((a+b)&(b+c))* " $ do
+        let regex1 = parseDef "((a+b)&(b+c))*"
+        Prelude.map (regex1 ~~) ["b", "cc", "a"]
+            `shouldBe` [True, False, False]

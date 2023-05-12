@@ -147,6 +147,7 @@ deriv a (Plus b c) = Plus (deriv a b) (deriv a c)
 deriv a (Star b) = Concat (deriv a b) (Star b)
 deriv a (Concat b c) = Plus (Concat (deriv a b) c) (if nullable b then (deriv a c) else EmptySet)
 deriv a (Not b) = Not (deriv a b)
+deriv a (And b c) = And (deriv a b) (deriv a c)
 -- Matching on the basis of algorithm 
 
 {- A more efficient string matching function which
