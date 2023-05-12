@@ -4,7 +4,7 @@ module RegExpDerivatives.RegExp
    , Parser
    , parse
    , deriv
-   , justToDef
+   , parseDef
    , nullable
    , deriv
    , (~~)
@@ -33,6 +33,9 @@ data RegExp = EmptySet
     deriving (Eq, Ord)
 
 -- Constructors for weak notion of equivalence (4.1)
+ch :: Char -> RegExp
+ch c = Ch c
+
 emptySet :: RegExp
 emptySet = EmptySet
 
@@ -71,7 +74,7 @@ not (Not a) = a
 instance Show RegExp where
   show = showConcat
     where
-    showConcat (Concat a b) = show a ++ show b
+    showConcat (Concat a b) = show a ++ "." ++ show b
     showConcat re = showPlus re
 
     showPlus (Plus a b) = show a ++ "+" ++ show b
@@ -142,11 +145,7 @@ deriv a (Ch b)
   | a /= b = EmptySet
 deriv a (Plus b c) = Plus (deriv a b) (deriv a c)
 deriv a (Star b) = Concat (deriv a b) (Star b)
-deriv a (Concat b c) = 
-  if nullable b -- then we want to be able to take the deriv of the other c
-  then Plus (Concat (deriv a b) c) (deriv a c)
-  else Concat (deriv a b) c 
-deriv a (And b c) = And (deriv a b) (deriv a c)
+deriv a (Concat b c) = Plus (Concat (deriv a b) c) (if nullable b then (deriv a c) else EmptySet)
 deriv a (Not b) = Not (deriv a b)
 -- Matching on the basis of algorithm 
 
@@ -156,13 +155,17 @@ deriv n (deriv n-1 .. deriv a2 (deriv a1 r)))) and checks if the result is nulla
 if so => the string is in the language of r
 -}
 (~~) :: RegExp -> String -> Bool
-(~~) regex str = nullable (Prelude.foldr deriv regex str)
+(~~) regex [] = nullable regex
+(~~) regex (s:ss) = (deriv s regex) ~~ ss
 
 justToDef :: Maybe RegExp -> RegExp
 justToDef (Just a) = a
 justToDef Nothing = EmptySet
 
--- (~:) :: RegExp -> String -> DFA
+parseDef :: String -> RegExp
+parseDef str = if regex == Nothing then error "bad string" else justToDef regex
+          where regex = Text.Megaparsec.parseMaybe parse(str)
+-- (~:) :: RegExp -> [String -> DFA
 -- (~:) regex str = nullable (Prelude.foldr deriv regex str)
 -- Function to generate a DFA from a regular expression using the Brzozwski algorithm
 

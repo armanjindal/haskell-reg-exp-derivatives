@@ -93,11 +93,11 @@ also expands the size of the derivative, which can grow exponentially large.
 Looking at the slides on RegExp from class, the method there, which was to brute force the string matching proof on the basis of the judgment rules of regex was clearly less efficient than taking the partial derivative successively on the characters of the string and checking if the resulting regex is nullable (which is to say if it recognizes the epsilon). Haskell has a wonderfully concise way of implementing this:
 ```
 (~~) :: RegExp -> String -> Bool
-
-(~~) regex str = nullable (Prelude.foldr deriv regex str)
+(~~) regex [] = nullable regex
+(~~) regex (s:ss) = (deriv s regex) ~~ ss
 ```
 
-It applies the derivative operator acting as an accumulator on the regex, character by character (using the foldl), and then checks if the resulting regex is nullable. 
+It applies the derivative of the first character onto the regex recursivley untill the string is empty, and then checks if the resulting regex is nullable!
 
 5. Testing using Tasty and Hspec Framework
 

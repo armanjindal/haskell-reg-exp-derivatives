@@ -9,7 +9,7 @@ import Test.Hspec
 import RegExpDerivatives hiding (main)
 import Text.Megaparsec (parseMaybe)
 import Data.Text
-import RegExpDerivatives.RegExp (RegExp(..),parse, justToDef)
+import RegExpDerivatives.RegExp (RegExp(..),parse, parseDef, deriv, nullable)
 
 main :: IO ()
 main = do
@@ -19,13 +19,13 @@ main = do
 unitTests :: Spec
 unitTests = parallel $ do
     it "pretty printing concat abc" $ do
-        show(Concat (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "abc"
+        show(Concat (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "a.b.c"
 
     it "pretty printing plus and star a+b*" $ do
         show (Star (Plus (Ch 'a') (Ch 'b'))) `shouldBe` "a+b*"
 
     it "pretty printing ab+c" $ do
-        show (Plus (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "ab+c"
+        show (Plus (Concat (Ch 'a') (Ch 'b')) (Ch 'c')) `shouldBe` "a.b+c"
 
     it "parsing ab+c" $ do 
         parseMaybe parse ("ab+c")
@@ -35,6 +35,10 @@ unitTests = parallel $ do
         parseMaybe parse ("(a~)*")
           `shouldBe` Just (Star (Not (Ch 'a')))
 
+    it "testing the derivative func on a.b with respect to a and b" $ do 
+        let regex = Concat (Ch 'a') (Ch 'b')
+        nullable (deriv 'b' (deriv 'a' regex))
+          `shouldBe` True
 
     it "string matching (a)* " $ do
         let regex = Star ( Ch ('a'))
@@ -47,16 +51,21 @@ unitTests = parallel $ do
           `shouldBe` [True, True, True, True, True, False, False]
 
     it "string parsing and matching b*b " $ do
-        let regex1 = justToDef $ parseMaybe parse("b*b")
+        let regex1 = parseDef "b*b"
         Prelude.map (regex1 ~~) ["a", "aa", "ab", "bbb", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad", "bbbbbb"]
             `shouldBe` [False, False, False, True, False, False, False, True]
 
     it "string parsing and matching aa " $ do
-        let regex1 = justToDef $ parseMaybe parse("aa")
+        let regex1 = parseDef "aa"
         Prelude.map (regex1 ~~) ["a", "aa", "ab", "bbb", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad"]
             `shouldBe` [False, True, False, False, False, False, False]
 
     it "string parsing and matching ε " $ do
-        let regex1 = justToDef $ parseMaybe parse("ε")
+        let regex1 = parseDef "ε"
         Prelude.map (regex1 ~~)["a", "aa", "ab", "bbb", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad"]
             `shouldBe` [False, False, False, False, False, False, False]
+
+    it "string parsing and matching (abba)* " $ do
+        let regex1 = parseDef "(abba)*"
+        Prelude.map (regex1 ~~) ["a", "aa", "abba", "abbaabba", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad"]
+            `shouldBe` [False, False, True, True, False, False, False]
