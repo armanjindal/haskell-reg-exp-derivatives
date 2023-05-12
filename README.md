@@ -16,7 +16,6 @@ Prelude.map (regex ~~) ["a", "aa", "ab", "bbb", "aaaaaaaaaaaaaaab", "c", "caaaab
 The function ~~ :: Regex -> String -> Bool, follows the algorithm in 3.2, which takes the first letter of the string (s:ss) and takes the derivative of regex with respect to s. This process is repeated until all the letters of the string are exhausted. If the remaining RegExp expresses a language that contains the empty string (Epsilon), which is to say it is nullable, then the string is part of the language. 
 
 Example: 
-$$
 
 a⋅b∗​∼abb⟺
 ∂a​(a⋅b∗)∼bb⟺
@@ -28,12 +27,11 @@ b∗∼b⟺
 b∗∼ε⟺
 nullabe ? (b∗)=ε True
 
-$$
 
 
 Since this is my first time working with Haskell on a functional programming project of this size, I focused on understandability over complexity. I included in this read-me explanation of what I did and plenty of unit tests that help illustrate how the program works, at each step. This work draws heavily and follows both notation and naming from a paper by S. Owens, J. Reppy, A. Turon called [*Regular-expressions derivatives reexamined*](https://www.ccs.neu.edu/home/turon/re-deriv.pdf) and on the implementation strategy of [Professor Michael Greenberg](https://cs.pomona.edu/~michael/)of Pamano College, who graciously live streamed on Twitch the development and process which proved invaluable for a new initiate to Haskell development and its workflows. I based much of the architecture and code of this project on his presentation. 
 
-This was built using the Haskeleton frame work and can be run with `stack build`.
+This was built using the Haskeleton framework and can be run with `stack build`.
 
 `stack ghci` for interactivity
 
@@ -68,6 +66,13 @@ deriving (Eq, Ord)
 The next major challenge was to parse the command line input into this object format. Using the standard parser Text.Megaparsec, based on examples and from the third homework. Understanding and getting this to work took up a lot of the focus of the project, as it also forced me to try to understand how monads work.  I didn't fully understand them or the library, which is why I couldn't get the not operator to be parsed on the left side, so I chose to parse where it binds to the right "b~" = Not ( Ch ('b'))
 
 3. Derivative and Nullable
+
+In essence we are using these two functions (deriv, nullable) to check if a regex matches a string: 
+
+Where r :: Regex, a :: String 
+
+r ~ ε ⇔ nullable(r) = True
+r ~ a · w ⇔ (deriv a r) ~ w
 
 Implementing these was quite straightforward and followed very logically from the paper. This is the benefit of coding in Haskell and with the ADT.  I worked through a few examples to understand why each rule was what it was. The most confusing of the rules, mathematically is for concatenation. If the first part of the concat (s.a) is nullable it is possible that an epsilon in a string captures it, and in this case, we need to also take the derivative with respect to a. This condition:
 
