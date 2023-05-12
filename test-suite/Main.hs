@@ -46,12 +46,17 @@ unitTests = parallel $ do
         Prelude.map (regex ~~) ["a", "aa", "ab", "bbb", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad"]
           `shouldBe` [True, True, True, True, True, False, False]
 
-    it "string parsing and matching b~b " $ do
-        let regex1 = justToDef $ parseMaybe parse("b~b")
-        Prelude.map (regex1 ~~) ["a", "aa", "ab", "bbb", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad"]
-            `shouldBe` [False, False, False, True, False, False, False]
+    it "string parsing and matching b*b " $ do
+        let regex1 = justToDef $ parseMaybe parse("b*b")
+        Prelude.map (regex1 ~~) ["a", "aa", "ab", "bbb", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad", "bbbbbb"]
+            `shouldBe` [False, False, False, True, False, False, False, True]
 
     it "string parsing and matching aa " $ do
         let regex1 = justToDef $ parseMaybe parse("aa")
         Prelude.map (regex1 ~~) ["a", "aa", "ab", "bbb", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad"]
             `shouldBe` [False, True, False, False, False, False, False]
+
+    it "string parsing and matching ε " $ do
+        let regex1 = justToDef $ parseMaybe parse("ε")
+        Prelude.map (regex1 ~~)["a", "aa", "ab", "bbb", "aaaaaaaaaaaaaaab", "c", "caaaababababbabad"]
+            `shouldBe` [False, False, False, False, False, False, False]

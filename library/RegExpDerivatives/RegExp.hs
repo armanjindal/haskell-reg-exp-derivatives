@@ -32,6 +32,42 @@ data RegExp = EmptySet
     | And RegExp RegExp
     deriving (Eq, Ord)
 
+-- Constructors for weak notion of equivalence (4.1)
+emptySet :: RegExp
+emptySet = EmptySet
+
+epsilon :: RegExp
+epsilon = Epsilon
+
+concat :: RegExp -> RegExp -> RegExp
+concat Epsilon b = b
+concat a Epsilon = a
+concat EmptySet b = EmptySet
+concat a EmptySet = EmptySet
+concat a b = Concat a b
+
+plus :: RegExp -> RegExp -> RegExp
+plus a b = if a == b then a else Plus a b
+plus EmptySet b = b
+plus b EmptySet = b
+plus Epsilon b = if nullable b then b else Plus Epsilon b
+plus a Epsilon = if nullable a then a else Plus a Epsilon
+
+and :: RegExp -> RegExp -> RegExp
+and a b = if a == b then a else And a b
+and EmptySet b = EmptySet
+and a EmptySet = EmptySet
+and (Not EmptySet) b = b
+
+star :: RegExp -> RegExp
+star Epsilon = Epsilon
+star (Star a) = Star a
+star EmptySet = Epsilon
+
+not :: RegExp -> RegExp
+not (Not a) = a
+
+-- These weak notions of equivalence ensure that any finite RE has a finite num of derivates and therefore states 
 instance Show RegExp where
   show = showConcat
     where
@@ -77,7 +113,7 @@ parseNot =
   <|> parseChar
 
 parseChar = 
-    try(Ch <$> satisfy (not . (`elem` specialChars)))
+    try(Ch <$> satisfy (Prelude.not . (`elem` specialChars)))
   <|> try(Ch <$> (single '\\' *> satisfy (`elem` specialChars)))
   <|> try(pure Epsilon <* single 'ε')
   <|> try(pure EmptySet <* single '∅')
@@ -96,7 +132,7 @@ nullable (Ch a) = False
 nullable (Concat a b) =  nullable a && nullable b
 nullable (Plus a b) = nullable a || nullable b
 nullable (And a b) = nullable a && nullable b
-nullable (Not a) = not $ nullable a
+nullable (Not a) = Prelude.not $ nullable a
 
 deriv :: Char -> RegExp -> RegExp
 deriv _ Epsilon = EmptySet
