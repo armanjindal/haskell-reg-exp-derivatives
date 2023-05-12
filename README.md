@@ -71,9 +71,10 @@ In essence we are using these two functions (deriv, nullable) to check if a rege
 
 Where r :: Regex, a :: String 
 
+```
 r ~ ε ⇔ nullable(r) = True
 r ~ a · w ⇔ (deriv a r) ~ w
-
+```
 Implementing these was quite straightforward and followed very logically from the paper. This is the benefit of coding in Haskell and with the ADT.  I worked through a few examples to understand why each rule was what it was. The most confusing of the rules, mathematically is for concatenation. If the first part of the concat (s.a) is nullable it is possible that an epsilon in a string captures it, and in this case, we need to also take the derivative with respect to a. This condition:
 
 ```
